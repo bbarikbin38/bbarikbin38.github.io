@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Topic Giphs!</title>
+    <style type="text/css">
+        button,
+        div,
+        form,
+        input {
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Topics</h1>
+
+        <!-- Rendered buttons will be put here  -->
+        <div id="buttons-view"></div>
+
+        <!-- Creating a form so the user can add a new topic for a giph-->
+        <form id="topic-form">
+            <label for="topic-input">Search for a topic you like</label>
+            <input type="text" id="topic-input"><br>
+
+            <!-- Button triggers new topic to be added -->
+            <input id="add-topic" type="submit" value="Add Topic Button">
+        </form>
+
+        <!-- Topic buttons will Get Dumped Here -->
+        <div id="giphs-view"></div>
+
+
+
+        <!--calling javascript here-->
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script type="text/javascript">
+
+
+            // Creating our array called topics...just put in 4 to start.
+            var topics = ["Sports", "Food", "Travel", "Health"];
+
+            // Creating a function to dump the JSON content for each of the buttons for the topics into the div
+            function displayTopicGiph() {
+
+                var topic = $(this).attr("data-name");
+                var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+                    topic + "&api_key=dc6zaTOxFJmzC&limit=10";
+
+                $.ajax({
+                    url: queryURL,
+                    method: "GET"
+                }).then(function (response) {
+
+                    var results = response.data;
+                    console.log(results);
+
+                    for (var i = 0; i < results.length; i++) {
+                        var gifDiv = $("<div>");
+                        //creating rating variable
+                        var rating = results[i].rating;
+                        //setting up the gif and static sources
+                        var defaultGifSrc = results[i].images.fixed_height.url;
+                        var staticSrc = results[i].images.fixed_height_still.url;
+                        // Creating and storing an image tag
+                        var topicImage = $("<img>");
+                        // Creating a paragraph tag with the resulting gifs rating
+                        var p = $("<p>").text("Rating: " + rating);
+                        // Setting the src attribute of the image to pull the still image
+
+                        topicImage.attr("src", staticSrc);
+                        topicImage.attr("data-state", "still");
+                        //adding class so I can click it and call the play pause function 
+                        topicImage.addClass("topicGiphy");
+                        topicImage.attr("data-still", staticSrc);
+                        topicImage.attr("data-animate", defaultGifSrc);
+
+                        console.log(results);
+
+                        // Appending the paragraph and image tag to the topic div
+                        gifDiv.append(topicImage);
+                        gifDiv.append(p);
+
+                        // Prependng the topic div to the HTML page in the gifs view div
+                        $("#giphs-view").prepend(gifDiv);
+                    }
+
+                    $(document).on("click", ".topicGiphy", pausePlayGifs);
+
+                    // Creating the function to alter giph states 
+
+                    function pausePlayGifs() {
+                        var state = $(this).attr("data-state");
+                        if (state === "still") {
+                            $(this).attr("src", $(this).attr("data-animate"));
+                            $(this).attr("data-state", "data-animate");
+                        } else {
+                            $(this).attr("src", $(this).attr("data-still"));
+                            $(this).attr("data-state", "still");
+                        }
+                    }
+
+                });
+            }
+
+            // Function for displaying topic data
+            function renderButtons() {
+
+                // Deleting the buttons prior to adding new topics
+                // (this is necessary otherwise you will have repeat buttons)
+                $("#buttons-view").empty();
+
+                // Looping through the array of topics
+                for (var i = 0; i < topics.length; i++) {
+
+                    // Then dynamically generating buttons for each topic in the array
+                    // This code $("<button>") is all jQuery needs to create the beginning and end tag. (<button></button>)
+                    var a = $("<button>");
+                    // Adding a class of topic to our button
+                    a.addClass("topic");
+                    // Adding a data-attribute
+                    a.attr("data-name", topics[i]);
+                    // Providing the initial button text
+                    a.text(topics[i]);
+                    // Adding the button to the buttons-view div
+                    $("#buttons-view").append(a);
+                }
+            }
+
+            // This function handles events where one button is clicked
+            $("#add-topic").on("click", function (event) {
+                event.preventDefault();
+
+                // This line grabs the input from the textbox
+                var topic = $("#topic-input").val().trim();
+
+                // Adding the topic from the textbox to our topic array
+                topics.push(topic);
+
+
+                // Calling renderButtons function
+                renderButtons();
+            });
+
+            // displaying the topic info
+            $(document).on("click", ".topic", displayTopicGiph);
+
+            // Calling the renderButtons function to display the initial buttons
+            renderButtons();
+
+
+
+
+
+        </script>
+    </div>
+</body>
+
+</html>
