@@ -6,4 +6,5 @@ when trying to access the files from github.io page.
 Please use the following commands to test the appication:
 1) movie-this [insert movie title]
 2) spotify-this track [insert track title]
-3) 
+3) concert-this [insert band/artist name]
+4) The functionality for 
